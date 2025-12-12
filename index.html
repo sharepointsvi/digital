@@ -275,7 +275,8 @@ body{
 let userSelectedFilter = false;
 
 const state = {
-  endpoint: localStorage.getItem('mitra_flow') || '',
+  endpoint: localStorage.getItem('mitra_flow') 
+        || "https://default0ae51e1907c84e4bbb6d648ee58410.f4.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bc3a60668d1c4bf085648f4939988c92/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UKvKeROSsGt8AJJ9JP1Xg9qDF7wsr7tkpj9XkX1UsR0",
   username: localStorage.getItem('mitra_user') || '',
   engineerName: localStorage.getItem('mitra_engineer') || '',
   zone: localStorage.getItem('mitra_zone') || ''
