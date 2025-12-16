@@ -1,114 +1,144 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mitra v1.2 — Unified (Login • Visits • Presence)</title>
+<meta charset="UTF-8">
+<title>iMitra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
+/* ------------------------- ROOT + GLOBALS ------------------------- */
 :root{
   --accent:#0f6cbd;
-  --bg:#f4f8fb;
+  --accent-dark:#0a5f8f;
+  --bg:#f5f8fc;
   --card:#ffffff;
   --muted:#6b7280;
   --radius:14px;
+
+  /* STATUS COLORS */
+  --status-active:#16a34a;
+  --status-upcoming:#eab308;
+  --status-completed:#6b7280;
+  --status-cancelled:#dc2626;
+  --status-postponed:#60a5fa;
+
+  /* PRESENCE COLORS */
+  --rex:#16a34a;
+  --cp:#60a5fa;
+  --office:#10b981;
+  --leave:#dc2626;
+  --holiday:#eab308;
 }
-*{box-sizing:border-box}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
 body{
   margin:0;
   font-family:Inter,system-ui,Arial,sans-serif;
-  background:linear-gradient(180deg,var(--bg),#fff);
+  background:var(--bg);
   color:#0b2540;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
 }
-.app{max-width:520px;margin:0 auto;padding-bottom:110px}
 
-/* HEADER */
+/* --------------------------- HEADER --------------------------- */
 .header{
+  background:linear-gradient(90deg,var(--accent),var(--accent-dark));
+  color:#fff;
+  padding:12px 16px;
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:12px;
-  border-radius:0 0 14px 14px;
-  background:linear-gradient(90deg,var(--accent),#0a5f8f);
-  color:#fff;
   position:sticky;
   top:0;
-  z-index:1000;
+  z-index:999;
+  box-shadow:0 2px 6px rgba(0,0,0,0.12);
 }
-.brand{font-weight:700;font-size:20px}
-#loggedUserInline{font-size:14px;font-weight:600;margin-left:10px}
-.headerActions{margin-left:auto;display:flex;gap:10px;align-items:center}
+
+.brand{
+  font-size:20px;
+  font-weight:700;
+}
+
+.headerActions{
+  margin-left:auto;
+  display:flex;
+  gap:10px;
+}
+
 .roundBtn{
-  width:42px;height:42px;border-radius:50%;border:0;background:white;color:#0b2540;font-size:18px;font-weight:700;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#fff;
+  color:#0b2540;
+  border:none;
+  cursor:pointer;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.12);
+  transition:0.15s;
 }
-.roundBtn:active{transform:scale(0.96);}
+.roundBtn:active{ transform:scale(0.93); }
 
-/* ENGINEER NAME ROW (below header) */
-.engineerRow{padding:10px 18px;font-weight:600;color:#0b2540}
+/* ----------------------- APP WRAPPER ----------------------- */
+.app{
+  max-width:520px;
+  margin:0 auto;
+  padding-bottom:120px;
+}
 
-/* CARD */
-.card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 10px 30px rgba(11,37,70,0.06);margin:14px}
-.label{font-size:13px;color:var(--muted);margin-bottom:8px}
-.input{width:100%;padding:12px;border-radius:10px;border:1px solid #e6eef6;background:#fff;font-size:15px;margin-bottom:12px}
-.btn{background:var(--accent);color:#fff;padding:12px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
-.small{padding:8px 10px;border-radius:8px;border:1px solid #e6eef6;background:#fff}
-
-/* VISITS */
-.visitsHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.refreshBtn{background:#0f6cbd;color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
-.visitCard{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(11,37,70,0.04);cursor:pointer}
-.visitTitle{font-size:17px;font-weight:700;margin-bottom:6px}
-.visitSub{color:var(--muted);font-size:14px;margin-bottom:6px}
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 90px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
-  color: #fff;
+.hidden{
+  display:none !important;
 }
 
 
-/* NEW STATUS COLORS */
-.statusActive {
-  background: #16a34a;     /* green */
-  color: #fff;
+/* ---------------------------- CARDS ---------------------------- */
+.card{
+  background:var(--card);
+  padding:18px;
+  border-radius:var(--radius);
+  margin:16px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);
 }
 
-.statusUpcoming {
-  background: #eab308;     /* yellow */
-  color: #000;
+.label{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:4px;
 }
 
-.statusCompleted {
-  background: #6b7280;     /* grey */
-  color: #fff;
+.input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #d9e2ec;
+  background:#fff;
+  font-size:15px;
+  margin-bottom:12px;
 }
 
-.statusCancelled {
-  background: #dc2626;     /* red */
-  color: #fff;
+.btn{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:12px 14px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
 }
 
-.statusPostponed {
-  background: #60a5fa;     /* pale blue */
-  color: #000;
+.small{
+  background:#eef2f6;
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  border:1px solid #d7dde3;
 }
 
-
-/* MODAL */
-.modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;padding:18px}
-.modalCard{background:#fff;border-radius:12px;padding:18px;max-width:520px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,0.2);max-height:90vh;overflow:auto}
-.modalClose{float:right;font-size:22px;cursor:pointer;color:#333}
-
-/* BOTTOM NAV (WhatsApp style) */
+/* ----------------------------- BOTTOM NAV ----------------------------- */
 .bottomNav{
   position:fixed;
   bottom:12px;
@@ -118,363 +148,599 @@ body{
   max-width:520px;
   display:flex;
   gap:14px;
-  z-index:1500;
+  z-index:999;
 }
+
 .navBtn{
   flex:1;
   text-align:center;
-  padding:12px 10px;
+  padding:12px;
   border-radius:999px;
-  font-weight:700;
-  background:#f1f5f9;
+  background:#eef2f6;
   color:#0b2540;
+  font-weight:700;
   cursor:pointer;
-  box-shadow:0 8px 18px rgba(11,37,70,0.04);
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
 }
-.navBtn.active{background:var(--accent);color:#fff;box-shadow:0 12px 30px rgba(11,37,70,0.08)}
 
-/* TOAST */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:120px;background:#111;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:2000}
+.navBtn.active{
+  background:var(--accent);
+  color:#fff;
+  box-shadow:0 8px 18px rgba(0,0,0,0.12);
+}
 
-/* SETTINGS BOTTOM SHEET (slide-up) */
-.sheetWrap{position:fixed;left:0;right:0;bottom:0;top:0;display:none;z-index:2000}
-.sheetBackdrop{position:absolute;inset:0;background:rgba(0,0,0,0.45)}
+/* --------------------------- STATUS BADGES --------------------------- */
+.statusBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:90px;
+  height:26px;
+  padding:0 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  text-transform:capitalize;
+  color:#fff;
+}
+
+.statusActive{ background:var(--status-active); }
+.statusUpcoming{ background:var(--status-upcoming); color:#000; }
+.statusCompleted{ background:var(--status-completed); }
+.statusCancelled{ background:var(--status-cancelled); }
+.statusPostponed{ background:var(--status-postponed); color:#000; }
+
+/* ---------------------------- MODAL GENERIC ---------------------------- */
+.modalOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000;
+  padding:18px;
+}
+
+.modalCard{
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  width:100%;
+  max-width:520px;
+  max-height:85vh;
+  overflow-y:auto;
+  box-shadow:0 0 20px rgba(0,0,0,0.25);
+}
+
+/* ---------------------------- SETTINGS SHEET ---------------------------- */
+.sheetWrap{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:1500;
+}
+
+.sheetBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+}
+
 .sheetCard{
   position:absolute;
-  left:0;right:0;
   bottom:0;
+  left:0;
+  right:0;
   background:#fff;
-  border-radius:16px 16px 0 0;
   padding:18px;
+  border-radius:16px 16px 0 0;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.25);
   transform:translateY(100%);
-  transition:transform 280ms cubic-bezier(.2,.9,.3,1);
-  box-shadow:0 -12px 36px rgba(0,0,0,0.18);
-  max-height:70vh;
-  overflow:auto;
+  transition:0.25s cubic-bezier(.25,.8,.25,1);
 }
-.sheetCard.open{transform:translateY(0%)}
 
-/* small helpers */
-.center{display:flex;align-items:center;justify-content:center}
-.hidden{display:none}
+.sheetCard.open{ transform:translateY(0); }
 
+/* ---------------------------- TOAST ---------------------------- */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:100px;
+  transform:translateX(-50%);
+  background:#111;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
+  display:none;
+  z-index:3000;
+}
+
+/* ---------------------------- VISIT CARD ---------------------------- */
+.visitCard{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  cursor:pointer;
+}
+.visitTitle{ font-size:16px; font-weight:700; margin-bottom:6px; }
+.visitSub{ font-size:14px; color:var(--muted); margin-bottom:4px; }
+
+/* -------------------------- PRESENCE CALENDAR -------------------------- */
+.calendarCard{
+  background:#fff;
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  margin:16px;
+}
+
+.calendarHeaderRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+
+.calendarMonthTitle{
+  font-weight:700;
+  font-size:18px;
+  text-align:center;
+  width:100%;
+}
+
+#calendarGrid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+
+.calendarDay{
+  min-height:70px;
+  background:#fff;
+  border:1px solid #e0e6ed;
+  border-radius:10px;
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  cursor:pointer;
+}
+
+.calendarDay.disabled{
+  background:#f0f2f5;
+  color:#b0b5bb;
+  cursor:default;
+}
+
+.calendarDay.today{
+  box-shadow:0 0 0 2px rgba(15,108,189,0.25);
+}
+
+.dayNum{
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.statusLabel{
+  margin-top:auto;
+  padding:3px 6px;
+  font-size:11px;
+  text-align:center;
+  border-radius:6px;
+  font-weight:600;
+}
+
+/* ------------------------- END OF PART 1 CSS ------------------------- */
 </style>
 </head>
+
 <body>
 
-<!-- HEADER -->
+<!-- ========================= HEADER ========================= -->
 <div class="header">
   <div class="brand">iMitra</div>
-  <div id="loggedUserInline" aria-hidden="true"></div>
+  <div id="loggedUserInline" style="margin-left:10px;font-weight:600;"></div>
   <div class="headerActions">
-    <button class="roundBtn" id="btnRefreshTop" title="Refresh" onclick="headerRefresh()">⟳</button>
-    <button class="roundBtn" id="btnSettingsTop" title="Settings" onclick="openSettingsSheet()">⚙️</button>
-    <button class="roundBtn" id="btnHeaderLogin" title="Login / Logout" onclick="toggleLoginLogout()">🔓</button>
+    <button class="roundBtn" onclick="headerRefresh()">⟳</button>
+    <button class="roundBtn" onclick="openSettingsSheet()">⚙️</button>
+    <button id="btnHeaderLogin" class="roundBtn" onclick="toggleLoginLogout()">🔓</button>
   </div>
 </div>
-
-<!-- Engineer name (will show after login) -->
-
 
 <div class="app">
 
-  <!-- LOGIN CARD (no endpoint here) -->
-  <div id="loginCard" class="card">
-    <h3 style="margin:0 0 12px 0">Login</h3>
+<!-- ========================= LOGIN CARD ========================= -->
+<div id="loginCard" class="card">
+  <h3 style="margin-top:0;margin-bottom:12px">Login</h3>
 
-    <div class="label">Username</div>
-    <input id="username" class="input" placeholder="e.g. Mano M">
+  <div class="label">Username</div>
+  <input id="username" class="input" placeholder="e.g. Mano M">
 
-    <div class="label">Password</div>
-    <input id="password" type="password" class="input" placeholder="Password">
+  <div class="label">Password</div>
+  <input id="password" type="password" class="input" placeholder="Password">
 
-    <div style="display:flex;gap:8px">
-      <button id="btnLogin" class="btn" style="flex:1" onclick="login()">Login</button>
-      <button class="btn" style="background:#e6eef6;color:#0b2540;width:110px" onclick="clearSaved()">Clear</button>
-    </div>
-
+  <div style="display:flex;gap:10px;margin-top:4px">
+    <button class="btn" style="flex:1" onclick="login()">Login</button>
+    <button class="small" style="width:110px" onclick="clearSaved()">Clear</button>
   </div>
 
-  <!-- VISITS (hidden until login) -->
-  <div id="visits" class="card hidden">
-  
-<div class="visitsHeader" style="display:flex;justify-content:space-between;align-items:center">
-  <div style="font-weight:700">My Visits</div>
-
-  <select id="statusFilter" class="small" style="font-size:14px;padding:6px 10px;border-radius:8px" onchange="applyStatusFilter()">
-    <option value="all">All</option>
-    <option value="active">Active</option>
-    <option value="completed">Completed</option>
-    <option value="upcoming">Upcoming</option>
-    <option value="cancelled">Cancelled</option>
-    <option value="postponed">Postponed</option>
-  </select>
-</div>
-	
-    <div id="visitsList">Loading...</div>
+  <div style="text-align:center;margin-top:12px;color:#6b7280;font-size:13px;">
+    v1.2<br>Managed by SVI
   </div>
-
-  <!-- PRESENCE (hidden until login) -->
-  <div id="presence" class="card hidden">
-    <h3 style="margin:0 0 8px 0">Presence</h3>
-    <div class="label">Set presence for a date</div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <input id="presenceDate" type="date" class="small" />
-      <select id="presenceStatus" class="small">
-        <option value="">-- Select status --</option>
-        <option>Office</option>
-        <option>On Leave</option>
-        <option>On Dealer site</option>
-      </select>
-      <input id="presenceNotes" class="small" placeholder="Notes (optional)">
-      <button class="btn" onclick="savePresence()">Save</button>
-    </div>
-
-    <div style="margin-top:12px">
-      <button class="small" onclick="loadPresence()">Load my presence</button>
-    </div>
-
-    <div id="presenceList" style="margin-top:12px">No records</div>
-  </div>
-
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="toast"></div>
 
-<!-- BOTTOM NAV (visible only when logged in) -->
-<div id="bottomNavWrap" class="bottomNav hidden" role="navigation">
-  <div id="navVisits" class="navBtn" onclick="switchTab('visits')">Visits</div>
-  <div id="navPresence" class="navBtn" onclick="switchTab('presence')">Presence</div>
-</div>
-
-<!-- SETTINGS SHEET (slide-up) -->
-<div id="settingsSheet" class="sheetWrap" aria-hidden="true">
+<!-- ========================= SETTINGS SHEET ========================= -->
+<div id="settingsSheet" class="sheetWrap">
   <div class="sheetBackdrop" onclick="closeSettingsSheet()"></div>
-  <div id="sheetCard" class="sheetCard" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-weight:700" id="settingsTitle">Settings</div>
-      <button onclick="closeSettingsSheet()" style="background:transparent;border:0;font-size:20px;cursor:pointer">✕</button>
-    </div>
+  <div id="sheetCard" class="sheetCard">
+    <div style="font-weight:700;margin-bottom:8px">Settings</div>
 
-    <div class="label">Power Automate Flow Endpoint (HTTP trigger)</div>
-    <input id="sheetFlowUrl" class="input" placeholder="https://your-flow-endpoint"/>
+    <div class="label">Flow Endpoint URL</div>
+    <input id="sheetFlowUrl" class="input">
 
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px">
       <button class="btn" onclick="saveSettings()">Save</button>
       <button class="small" onclick="closeSettingsSheet()">Close</button>
     </div>
-
-    <div class="label" style="margin-top:12px">Saved endpoint will be used by the app when calling your Flow.</div>
   </div>
 </div>
 
+<!-- ========================= TOAST ========================= -->
+<div id="toast" class="toast"></div>
+
+<!-- END OF PART 1 -->
+
+<!-- ========================= VISITS MODULE ========================= -->
+<div id="visits" class="card hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div style="font-weight:700;font-size:18px;">My Visits</div>
+
+    <!-- STATUS FILTER DROPDOWN -->
+    <select id="statusFilter" class="small" onchange="applyStatusFilter()" 
+      style="font-size:14px;padding:8px 12px;border-radius:8px;">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+      <option value="postponed">Postponed</option>
+    </select>
+  </div>
+
+  <div id="visitsList">Loading...</div>
+</div>
+
+
+<!-- ========================= VISIT MODAL ========================= -->
+<div id="visitModal" class="modalOverlay">
+  <div class="modalCard">
+
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div id="vmTitle" style="font-weight:700;font-size:18px;">Visit Details</div>
+      <div onclick="closeVisitModal()" style="font-size:20px;cursor:pointer">✕</div>
+    </div>
+
+    <div id="vmBody" style="margin-top:10px;font-size:14px;"></div>
+
+  </div>
+</div>
+
+
 <script>
-/* ---------------------- State ---------------------- */
+/* =====================================================================
+   GLOBAL STATE + DEFAULT ENDPOINT + LOGIN CONTROL
+   ===================================================================== */
+
 let userSelectedFilter = false;
+let globalVisits = [];
+
+// Default embedded endpoint
+const DEFAULT_ENDPOINT =
+"https://default0ae51e1907c84e4bbb6d648ee58410.f4.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bc3a60668d1c4bf085648f4939988c92/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UKvKeROSsGt8AJJ9JP1Xg9qDF7wsr7tkpj9XkX1UsR0";
 
 const state = {
-  endpoint: localStorage.getItem('mitra_flow') 
-        || "https://default0ae51e1907c84e4bbb6d648ee58410.f4.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bc3a60668d1c4bf085648f4939988c92/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UKvKeROSsGt8AJJ9JP1Xg9qDF7wsr7tkpj9XkX1UsR0",
-  username: localStorage.getItem('mitra_user') || '',
-  engineerName: localStorage.getItem('mitra_engineer') || '',
-  zone: localStorage.getItem('mitra_zone') || ''
+  endpoint: localStorage.getItem("mitra_flow") || DEFAULT_ENDPOINT,
+  username: localStorage.getItem("mitra_user") || "",
+  engineerName: localStorage.getItem("mitra_engineer") || "",
+  zone: localStorage.getItem("mitra_zone") || ""
 };
 
-/* Initialize inputs */
-document.getElementById('presenceDate').value = new Date().toISOString().slice(0,10);
-document.getElementById('sheetFlowUrl').value = state.endpoint;
-document.getElementById('username').value = state.username;
 
-/* Helpers */
-function toast(msg, t=2200){ const el=document.getElementById('toast'); el.innerText=msg; el.style.display='block'; setTimeout(()=>el.style.display='none', t); }
-function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function formatDateOnly(s){ if(!s) return ''; try{ const d=new Date(s); if(isNaN(d)) return s; return d.toISOString().split('T')[0]; }catch(e){ return s; } }
+/* =====================================================================
+   UTILITY HELPERS
+   ===================================================================== */
 
-/* Post to Flow */
-async function postFlow(payload){
-  const ep = state.endpoint || localStorage.getItem('mitra_flow') || document.getElementById('sheetFlowUrl').value.trim();
-  if(!ep) throw new Error('Flow endpoint missing. Save it in Settings.');
-  const res = await fetch(ep, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(payload)
-  });
-  if(!res.ok){
-    const txt = await res.text();
-    throw new Error('HTTP '+res.status + ' - ' + txt);
-  }
-  return res.json();
+function toast(msg, time=2000){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.style.display = "block";
+  setTimeout(()=> t.style.display="none", time);
 }
 
-/* ---------------------- Settings sheet (slide-up) ---------------------- */
+function escapeHtml(s){
+  if(!s) return "";
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"
+  }[m]));
+}
+
+function formatDateOnly(s){
+  if(!s) return "";
+  const d = new Date(s);
+  if(String(d) === "Invalid Date") return s;
+  return d.toISOString().slice(0,10);
+}
+
+function excelSerialToDate(serial) {
+  const excelEpoch = new Date(1899, 11, 30);
+  return new Date(excelEpoch.getTime() + Number(serial) * 86400000);
+}
+
+
+/* =====================================================================
+   SETTINGS SHEET LOGIC
+   ===================================================================== */
+
 function openSettingsSheet(){
-  document.getElementById('sheetCard').classList.add('open');
-  document.getElementById('settingsSheet').style.display = 'block';
-  document.getElementById('settingsSheet').setAttribute('aria-hidden','false');
-  // focus input after small delay
-  setTimeout(()=> document.getElementById('sheetFlowUrl').focus(), 220);
+  document.getElementById("settingsSheet").style.display = "block";
+  setTimeout(()=> document.getElementById("sheetCard").classList.add("open"), 20);
+  document.getElementById("sheetFlowUrl").value = state.endpoint;
 }
+
 function closeSettingsSheet(){
-  document.getElementById('sheetCard').classList.remove('open');
-  // small delay to allow closing animation
-  setTimeout(()=> {
-    document.getElementById('settingsSheet').style.display = 'none';
-    document.getElementById('settingsSheet').setAttribute('aria-hidden','true');
-  }, 260);
+  document.getElementById("sheetCard").classList.remove("open");
+  setTimeout(()=> document.getElementById("settingsSheet").style.display = "none", 200);
 }
+
 function saveSettings(){
-  const url = document.getElementById('sheetFlowUrl').value.trim();
-  if(!url){ toast('Please enter endpoint'); return; }
-  state.endpoint = url;
-  localStorage.setItem('mitra_flow', url);
-  toast('Settings saved');
+  const newUrl = document.getElementById("sheetFlowUrl").value.trim();
+  if(!newUrl){
+    toast("Please enter endpoint URL");
+    return;
+  }
+  localStorage.setItem("mitra_flow", newUrl);
+  state.endpoint = newUrl;
+  toast("Saved");
   closeSettingsSheet();
 }
 
-/* ---------------------- Login / Logout ---------------------- */
+
+/* =====================================================================
+   LOGIN / LOGOUT
+   ===================================================================== */
+
 async function login(){
-  const user = document.getElementById('username').value.trim();
-  const pass = document.getElementById('password').value.trim();
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
 
-  if(!user){ toast('Enter username'); return; }
-  if(!pass){ toast('Enter password'); return; }
-
-  // require endpoint to exist in settings
-  const ep = state.endpoint || localStorage.getItem('mitra_flow') || document.getElementById('sheetFlowUrl').value.trim();
-  if(!ep){
-    toast('Please add endpoint in Settings');
-    openSettingsSheet();
-    return;
-  }
-
-  // Save username locally (we'll update engineerName after flow response)
-  state.username = user;
-  localStorage.setItem('mitra_user', user);
-
-  const btn = document.getElementById('btnLogin');
-  btn.disabled = true; btn.innerText = 'Checking...';
+  if(!user){ toast("Enter username"); return; }
+  if(!pass){ toast("Enter password"); return; }
 
   try{
-    const r = await postFlow({ action:'login', username: user, password: pass });
+    const r = await postFlow({ action:"login", username:user, password:pass });
 
-    // engineer name from flow or fallback
+    if(!r || !r.success){
+      toast("Login failed");
+      return;
+    }
+
+    state.username = user;
     state.engineerName = r.engineerName || user;
-    localStorage.setItem('mitra_engineer', state.engineerName);
-    if(r.zone){ state.zone = r.zone; localStorage.setItem('mitra_zone', r.zone); }
 
-    // UI changes: hide login card, show engineer name and visits section + bottom nav
-    document.getElementById('loginCard').classList.add('hidden');
-    document.getElementById('visits').classList.remove('hidden');
-    document.getElementById('bottomNavWrap').classList.remove('hidden');
+    localStorage.setItem("mitra_user", state.username);
+    localStorage.setItem("mitra_engineer", state.engineerName);
 
-    // header login button becomes logout
-    document.getElementById('btnHeaderLogin').innerText = '🔓';
-    document.getElementById('loggedUserInline').innerText = state.engineerName;
+    document.getElementById("loggedUserInline").innerText = state.engineerName;
+    document.getElementById("btnHeaderLogin").innerText = "🔒";
 
-    // set endpoint from saved if present
-    state.endpoint = state.endpoint || localStorage.getItem('mitra_flow') || document.getElementById('sheetFlowUrl').value.trim();
-    document.getElementById('sheetFlowUrl').value = state.endpoint || '';
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("visits").classList.remove("hidden");
+	document.getElementById("presence").classList.add("hidden");
+    document.getElementById("bottomNavWrap").classList.remove("hidden");
 
-    // default to visits tab
-    switchTab('visits');
-    toast('Login success');
-  } catch(err){
-    console.error(err);
-    toast('Login failed: ' + (err.message || ''));
-  } finally {
-    btn.disabled = false; btn.innerText = 'Login';
+    switchTab("visits");
+    toast("Login successful");
+
+  } catch(e){
+    console.error(e);
+    toast("Error logging in");
   }
-}
-
-function clearSaved(){
-  localStorage.removeItem('mitra_user');
-  localStorage.removeItem('mitra_engineer');
-  localStorage.removeItem('mitra_flow');
-  localStorage.removeItem('mitra_zone');
-  // reset UI and refresh
-  state.endpoint = '';
-  state.username = '';
-  state.engineerName = '';
-  document.getElementById('sheetFlowUrl').value = '';
-  document.getElementById('username').value = '';
-  document.getElementById('password').value = '';
-  toast('Cleared local settings');
 }
 
 function logout(){
-  // Clear local storage
-  localStorage.removeItem('mitra_user');
-  localStorage.removeItem('mitra_engineer');
-  localStorage.removeItem('mitra_zone');
 
-  // Clear runtime state
+  localStorage.removeItem("mitra_user");
+  localStorage.removeItem("mitra_engineer");
+
   state.username = "";
   state.engineerName = "";
-  state.zone = "";
 
-  // Reset header
   document.getElementById("loggedUserInline").innerText = "";
-  document.getElementById("btnHeaderLogin").innerText = "🔒";
+  document.getElementById("btnHeaderLogin").innerText = "🔓";
 
-  // Hide all non-login UI
   document.getElementById("visits").classList.add("hidden");
   document.getElementById("presence").classList.add("hidden");
   document.getElementById("bottomNavWrap").classList.add("hidden");
 
-  // Show login card
   document.getElementById("loginCard").classList.remove("hidden");
-
-  // Reset filter logic
-  userSelectedFilter = false;
-
-  toast("Logged out");
 }
 
 
 function toggleLoginLogout(){
   if(state.username && state.engineerName){
-    // currently logged in -> logout
     logout();
   } else {
-    // not logged in -> scroll to login
-    document.getElementById('loginCard').scrollIntoView({behavior:'smooth'});
+    document.getElementById("loginCard").scrollIntoView({behavior:"smooth"});
   }
 }
 
-/* ---------------------- Visit status classification ---------------------- */
+
+/* =====================================================================
+   POST TO FLOW (POWER AUTOMATE ENDPOINT)
+   ===================================================================== */
+
+async function postFlow(payload){
+  const url = state.endpoint;
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(payload)
+  });
+  if(!res.ok){
+    const txt = await res.text();
+    throw new Error("Flow error: " + txt);
+  }
+  return res.json();
+}
+
+
+/* =====================================================================
+   VISIT CLASSIFICATION
+   ===================================================================== */
 
 function classifyVisit(v){
   const today = new Date();
   const start = new Date(v.StartDate || v.Start || "");
   const end = new Date(v.EndDate || v.End || "");
-  const status = (v.Status || "").toLowerCase();
+  const s = (v.Status || "").toLowerCase();
 
   // Direct Excel statuses
-  if(status === "completed") return "completed";
-  if(status === "cancelled") return "cancelled";
-  if(status === "postponed") return "postponed";
+  if(s === "completed") return "completed";
+  if(s === "cancelled") return "cancelled";
+  if(s === "postponed") return "postponed";
 
-  // System-calculated Active
+  // Active
   if(start <= today && today <= end){
     return "active";
   }
 
-  // System-calculated Upcoming
+  // Upcoming
   if(start > today){
     return "upcoming";
   }
 
-  // Default fallback
   return "active";
 }
 
-let globalVisits = []; // store visits after load
+
+/* =====================================================================
+   LOAD VISITS
+   ===================================================================== */
+
+async function loadVisits(){
+  if(!state.username) return;
+
+  const listEl = document.getElementById("visitsList");
+  listEl.innerHTML = "Loading...";
+
+  try{
+    const r = await postFlow({
+      action:"getVisits",
+      engineerName: state.engineerName,
+      username: state.username
+    });
+
+    if(!r || !r.success){
+      listEl.innerHTML = "<i>No visits returned</i>";
+      return;
+    }
+
+    const arr = (r.visits?.body) || r.visits || [];
+
+    const eng = (state.engineerName || state.username).trim().toLowerCase();
+
+    // partial match filtering
+    const filtered = arr.filter(v => {
+      const name = (v.EngineerName || "").trim().toLowerCase();
+      return name === eng || name.includes(eng);
+    });
+
+    globalVisits = filtered;
+
+    // Default filter = active + upcoming
+    if(!userSelectedFilter){
+      const def = globalVisits.filter(v => {
+        const c = classifyVisit(v);
+        return c === "active" || c === "upcoming";
+      });
+
+      if(def.length === 0){
+        listEl.innerHTML = `
+          <div style="text-align:center;padding:20px;color:#555;">
+            <div style="font-size:40px;margin-bottom:10px;">😎</div>
+            <b>No Active or Upcoming calls for ${escapeHtml(state.engineerName)}</b>
+            <br><br>
+            <span>Use the dropdown to view Completed or All visits.</span>
+          </div>`;
+        return;
+      }
+
+      renderVisits(def);
+
+    } else {
+      applyStatusFilter();
+    }
+
+  } catch(e){
+    console.error(e);
+    toast("Visits load error");
+    listEl.innerHTML = "Error loading visits";
+  }
+}
+
+
+/* =====================================================================
+   RENDER VISITS
+   ===================================================================== */
+
+function renderVisits(list){
+  const container = document.getElementById("visitsList");
+  container.innerHTML = "";
+
+  list.forEach(v=>{
+    const start = formatDateOnly(v.StartDate || v.Start || "");
+    const end = formatDateOnly(v.EndDate || v.End || "");
+    const c = classifyVisit(v);
+
+    let badgeClass = "";
+    if(c === "active") badgeClass="statusActive";
+    else if(c === "upcoming") badgeClass="statusUpcoming";
+    else if(c === "completed") badgeClass="statusCompleted";
+    else if(c === "cancelled") badgeClass="statusCancelled";
+    else if(c === "postponed") badgeClass="statusPostponed";
+
+    const card = document.createElement("div");
+    card.className = "visitCard";
+    card.onclick = ()=> openVisitModal(v);
+
+    card.innerHTML = `
+      <div class="visitTitle">${escapeHtml(v.CustomerName || v.Customer || "—")}</div>
+      <div class="visitSub">${escapeHtml(v.SiteLocation || v.VisitPlace || "")}</div>
+      <div class="visitSub">📅 ${start} → ${end}</div>
+      <div class="visitSub">Purpose: ${escapeHtml(v.Details || v.Purpose || "")}</div>
+      <div style="margin-top:8px;">
+        <span class="statusBadge ${badgeClass}">${c}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+
+/* =====================================================================
+   VISIT FILTER DROPDOWN
+   ===================================================================== */
 
 function applyStatusFilter(){
-userSelectedFilter = true;
+  userSelectedFilter = true;
+
   const f = document.getElementById("statusFilter").value;
+
   if(f === "all"){
     renderVisits(globalVisits);
     return;
@@ -484,212 +750,556 @@ userSelectedFilter = true;
   renderVisits(filtered);
 }
 
-/* ---------------------- Tabs & Nav ---------------------- */
-function highlightNav(tab){
-  document.getElementById('navVisits').classList.remove('active');
-  document.getElementById('navPresence').classList.remove('active');
-  if(tab==='visits') document.getElementById('navVisits').classList.add('active');
-  if(tab==='presence') document.getElementById('navPresence').classList.add('active');
+
+/* =====================================================================
+   VISIT MODAL
+   ===================================================================== */
+
+function openVisitModal(v){
+  const modal = document.getElementById("visitModal");
+  modal.style.display = "flex";
+
+  document.getElementById("vmTitle").innerText =
+    escapeHtml(v.CustomerName || "Visit");
+
+  const c = classifyVisit(v);
+
+  document.getElementById("vmBody").innerHTML = `
+    <p><b>Engineer:</b> ${escapeHtml(v.EngineerName || "")}</p>
+    <p><b>Site:</b> ${escapeHtml(v.SiteLocation || "")}</p>
+    <p><b>Start:</b> ${escapeHtml(v.StartDate || v.Start || "")}</p>
+    <p><b>End:</b> ${escapeHtml(v.EndDate || v.End || "")}</p>
+    <p><b>Purpose:</b> ${escapeHtml(v.Details || v.Purpose || "")}</p>
+    <p><b>Status:</b> ${c}</p>
+    <p><b>Zone:</b> ${escapeHtml(v.Zone || "")}</p>
+    <p><b>Visit ID:</b> ${escapeHtml(v.VisitID || "")}</p>
+  `;
 }
-function switchTab(name){
-  highlightNav(name);
-  document.getElementById('visits').classList.toggle('hidden', name!=='visits');
-  document.getElementById('presence').classList.toggle('hidden', name!=='presence');
-  if(name==='visits') loadVisits();
-  if(name==='presence') loadPresence();
+
+function closeVisitModal(){
+  document.getElementById("visitModal").style.display = "none";
 }
 
-/* Refresh header */
-function headerRefresh(){
-userSelectedFilter = false; 
-  // if not logged in, do nothing
-  if(!state.username) { toast('Not logged in'); return; }
-  // refresh the currently visible tab
-  if(!document.getElementById('visits').classList.contains('hidden')) loadVisits();
-  if(!document.getElementById('presence').classList.contains('hidden')) loadPresence();
-  toast('Refreshed');
-}
 
-/* ---------------------- Visits ---------------------- */
-async function loadVisits(){
-  if(!state.username){ return; }
-  const listEl = document.getElementById('visitsList');
-  listEl.innerHTML = 'Loading visits...';
-  try{
-    const r = await postFlow({
-  action:'getVisits',
-  engineerName: state.engineerName,
-  username: state.username
-});
+/* =====================================================================
+   TAB SWITCHING
+   ===================================================================== */
 
-    if(!r || !r.success){
-      listEl.innerHTML = '<i>No visits returned</i>';
-      return;
-    }
-    const arr = (r.visits && r.visits.body) ? r.visits.body : (r.visits || []);
-    // ---------------- DEBUG LOGS ----------------
-	console.log("Engineer from state:", state.engineerName);
-	console.log("Username from state:", state.username);
-	console.log("--------------------------------------------------");
-	console.log("ALL VISITS FROM FLOW:");
+async function switchTab(tab){
+  document.getElementById("visits").classList.add("hidden");
+  document.getElementById("presence").classList.add("hidden");
 
-	arr.forEach(v => {
-		console.log("Visit EngineerName:", v.EngineerName, "| Customer:", v.CustomerName);
-	});
-	console.log("--------------------------------------------------");
-	// ---------------- DEBUG LOGS END ---------------
+  document.getElementById("navVisits").classList.remove("active");
+  document.getElementById("navPresence").classList.remove("active");
 
-	const eng = (state.engineerName || state.username || "").trim().toLowerCase();
-
-const filtered = arr.filter(v => {
-  const name = (v.EngineerName || "").trim().toLowerCase();
-  // match if exact or contains the short name (works for "Akash" vs "Akash Rajak")
-  return name === eng || (eng && name.includes(eng));
-});
-
-    if(filtered.length===0){ listEl.innerHTML = '<i>No visits found for ' + escapeHtml(state.engineerName||state.username) + '</i>'; return; }
-	globalVisits = filtered;
-
-if(!userSelectedFilter){
-
-    // default view = Active + Upcoming only
-    const def = globalVisits.filter(v => {
-        const c = classifyVisit(v);
-        return c === "active" || c === "upcoming";
-    });
-
-    // 👉 If no active/upcoming calls, show relaxed message
-    if (def.length === 0) {
-        document.getElementById("visitsList").innerHTML = `
-            <div style="padding:20px; text-align:center; color:#555; font-size:14px;">
-                <div style="font-size:40px; margin-bottom:10px;">😎</div>
-                <b>No Active or Upcoming calls are there for ${escapeHtml(state.engineerName || state.username)}</b>
-                <br><br>
-                <span>Please use the dropdown above to check Completed or All visits.</span>
-            </div>
-        `;
-        return;   // stop here, do NOT render empty list
-    }
-
-    // Otherwise show active + upcoming visits normally
-    renderVisits(def);
-}
-	
-	else {
-		// user manually selected a filter → apply dropdown
-		applyStatusFilter();
-	}
-
-  } catch(err){
-    console.error(err);
-    listEl.innerHTML = 'Error loading visits';
-    toast('Visits load error');
+  if(tab === "visits"){
+    document.getElementById("navVisits").classList.add("active");
+    document.getElementById("visits").classList.remove("hidden");
+    loadVisits();
+  }
+  if(tab === "presence"){
+    document.getElementById("navPresence").classList.add("active");
+    document.getElementById("presence").classList.remove("hidden");
+    await loadVisits();
+	loadPresence();
   }
 }
 
-function renderVisits(list){
-  const container = document.getElementById('visitsList');
-  container.innerHTML = '';
-  list.forEach(v=>{
-    const start = formatDateOnly(v.StartDate || v.Start || '');
-    const end = formatDateOnly(v.EndDate || v.End || '');
-    
-	const c = classifyVisit(v);
+/* =====================================================================
+   HEADER REFRESH
+   ===================================================================== */
 
-	let badgeClass = "";
-	if (c === "active") badgeClass = "statusActive";
-	else if (c === "upcoming") badgeClass = "statusUpcoming";
-	else if (c === "completed") badgeClass = "statusCompleted";
-	else if (c === "cancelled") badgeClass = "statusCancelled";
-	else if (c === "postponed") badgeClass = "statusPostponed";
+function headerRefresh(){
+  if(document.getElementById("visits") && !document.getElementById("visits").classList.contains("hidden")){
+    userSelectedFilter = false;
+    loadVisits();
+  }
 
+  if(document.getElementById("presence") && !document.getElementById("presence").classList.contains("hidden")){
+    loadPresence();
+  }
 
-    const card = document.createElement('div');
-    card.className = 'visitCard';
-    card.onclick = ()=> openVisitModal(v);
-    card.innerHTML = `
-      <div class="visitTitle">${escapeHtml(v.CustomerName||v.Customer||'—')}</div>
-      <div class="visitSub">${escapeHtml(v.SiteLocation||v.VisitPlace||'')}</div>
-      <div class="visitSub">📅 ${start} → ${end}</div>
-      <div class="visitSub">Purpose: ${escapeHtml(v.Details||v.Purpose||'')}</div>
-      <div style="margin-top:8px"><span class="statusBadge ${badgeClass}">${c}</span></div>
-    `;
-    container.appendChild(card);
-  });
+  toast("Refreshed");
 }
-function openVisitModal(v){
-  const modal = document.createElement('div'); modal.className='modalOverlay';
-  modal.innerHTML = `<div class="modalCard">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-weight:700">${escapeHtml(v.CustomerName||'')}</div>
-      <div class="modalClose" onclick="this.closest('.modalOverlay').remove()">×</div>
+
+/* ========================= END OF PART 2 ========================= */
+</script>
+
+<!-- ========================= PRESENCE PAGE ========================= -->
+<div id="presence" class="hidden">
+
+  <div class="calendarCard">
+
+    <!-- CALENDAR HEADER -->
+    <div class="calendarHeaderRow">
+      <div class="calendarMonthTitle" id="calendarTitle">Month YYYY</div>
+      <div>
+        <button class="small" onclick="prevMonth()">Prev</button>
+        <button class="small" onclick="goToThisMonth()">This</button>
+        <button class="small" onclick="nextMonth()">Next</button>
+      </div>
     </div>
+
+    <!-- CALENDAR GRID -->
+    <div id="calendarGrid"></div>
+
+    <!-- LEGEND -->
+    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:13px;">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--rex);border-radius:4px;"></span> Rex-Visit
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--cp);border-radius:4px;"></span> Cp-Visit
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--office);border-radius:4px;"></span> Office
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--leave);border-radius:4px;"></span> Leave
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--holiday);border-radius:4px;"></span> Holiday
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ========================= PRESENCE MODAL ========================= -->
+<div id="presenceModal" class="modalOverlay">
+  <div class="modalCard">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div id="presenceModalTitle" style="font-weight:700;font-size:18px;">Presence</div>
+      <div onclick="closePresenceModal()" style="font-size:20px;cursor:pointer">✕</div>
+    </div>
+
     <div style="margin-top:10px">
-      <p><b>Site:</b> ${escapeHtml(v.SiteLocation||'')}</p>
-      <p><b>Start:</b> ${escapeHtml(v.StartDate||v.Start||'')}</p>
-      <p><b>End:</b> ${escapeHtml(v.EndDate||v.End||'')}</p>
-      <p><b>Purpose:</b> ${escapeHtml(v.Details||'')}</p>
-      <p><b>Status:</b> ${c}</p>
-      <p><b>Zone:</b> ${escapeHtml(v.Zone||'')}</p>
-      <p><b>Visit ID:</b> ${escapeHtml(v.VisitID||'')}</p>
+
+	<div class="label">Engineer Name</div>
+	<input id="modalEngineerName" class="input" readonly>
+
+	<div class="label">From Date</div>
+	<input id="modalFromDate" type="date" class="input">
+
+	<div class="label">To Date</div>
+	<input id="modalToDate" type="date" class="input">
+
+	<div class="label">Presence Type</div>
+	<select id="modalPresenceType" class="input">
+	  <option value="">Select</option>
+	  <option value="Rex-Visit">Rex-Visit</option>
+	  <option value="Cp-Visit">Cp-Visit</option>
+	  <option value="Office">Office</option>
+	  <option value="Leave">Leave</option>
+	  <option value="Holiday">Holiday</option>
+	</select>
+
+	<div class="label">Note</div>
+	<textarea id="modalNote" class="input" rows="3" placeholder="Optional"></textarea>
+
+
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
+        <button id="modalSaveBtn" class="btn" onclick="savePresenceFromModal()">Save</button>
+        <button id="modalDeleteBtn" class="btn" style="background:#e85d5d;display:none;"
+            onclick="deletePresenceFromModal()">Delete</button>
+        <button class="small" onclick="closePresenceModal()">Cancel</button>
+      </div>
     </div>
-  </div>`;
-  document.body.appendChild(modal);
+
+  </div>
+</div>
+
+
+
+<script>
+/* =====================================================================
+   PRESENCE MODULE
+   ===================================================================== */
+
+let presenceData = {};  
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();  // 0-based month
+
+function pad(n){ return n<10 ? "0"+n : ""+n; }
+function ymd(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+
+function monthName(m){
+  return new Date(calYear, m, 1)
+    .toLocaleString("default", {month:"long"});
 }
 
-/* ---------------------- Presence ---------------------- */
-async function savePresence(){
-  if(!state.username){ toast('Login first'); return; }
-  const date = document.getElementById('presenceDate').value;
-  const status = document.getElementById('presenceStatus').value;
-  const notes = document.getElementById('presenceNotes').value;
-  if(!date || !status){ toast('Choose date & status'); return; }
-  try{
-    const payload = { action:'savePresence', presence: { Username: state.username, EngineerName: state.engineerName||state.username, Date: date, Status: status, Notes: notes } };
-    const r = await postFlow(payload);
-    if(r && r.success){ toast('Presence saved'); loadPresence(); } else toast('Save failed');
-  } catch(err){ console.error(err); toast('Presence save error'); }
-}
+/* ------------------ Load presence from Flow ------------------ */
 async function loadPresence(){
-  if(!state.username){ toast('Login first'); return; }
-  const el = document.getElementById('presenceList'); el.innerHTML = 'Loading...';
+  if(!state.username) return;
+
+	renderCalendar(calYear, calMonth);
+
   try{
-    const r = await postFlow({ action:'getPresence', username: state.username });
-    const arr = r.present?.body || r.present || [];
-    if(!arr || arr.length===0){ el.innerHTML = '<i>No presence records</i>'; return; }
-    let html = '<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left">Date</th><th style="text-align:left">Status</th><th style="text-align:left">Notes</th></tr>';
-    arr.forEach(p => { html += `<tr><td>${escapeHtml(p.Date||'')}</td><td>${escapeHtml(p.Status||'')}</td><td>${escapeHtml(p.Notes||'')}</td></tr>` });
-    html += '</table>'; el.innerHTML = html;
-  } catch(err){ console.error(err); el.innerHTML = 'Error loading presence'; toast('Presence load error'); }
+	const r = await postFlow({
+	  action: "getPresence",
+	  engineerName: state.engineerName
+	});
+
+    const arr = r?.present?.body || r?.present || [];
+
+presenceData = {};
+
+arr.forEach(row => {
+  if (!row.FromDate) return;
+
+  const d = excelSerialToDate(row.FromDate);
+  const key = ymd(d);
+
+  presenceData[key] = {
+    Status: row.PresenceType,
+    Notes: row.Note || ""
+  };
+});
+
+    renderCalendar(calYear, calMonth);
+
+  } catch(e){
+    console.error(e);
+    toast("Failed loading presence");
+  }
 }
 
-/* ---------------------- Auto-load if session exists ---------------------- */
-window.addEventListener('load', ()=>{
+function getVisitStatusForDate(dateKey){
+  // dateKey format = YYYY-MM-DD
+  const matches = globalVisits.filter(v=>{
+    const start = formatDateOnly(v.StartDate || v.Start || "");
+    const end = formatDateOnly(v.EndDate || v.End || "");
+    return start <= dateKey && dateKey <= end;
+  });
 
-  // Always restore correct values from localStorage
-  state.endpoint = localStorage.getItem('mitra_flow') || '';
-  state.username = localStorage.getItem('mitra_user') || '';
-  state.engineerName = localStorage.getItem('mitra_engineer') || '';
-  state.zone = localStorage.getItem('mitra_zone') || '';
+  if(matches.length === 0) return null;
 
+  // determine if any Rex-Visit
+  const visit = matches[0];
+
+  const c = classifyVisit(visit);
+
+  // Only show for active/upcoming/completed
+  if(c === "active" || c === "upcoming" || c === "completed"){
+      return {
+        Status: visit.Brand === "Rex" ? "Rex-Visit" : "Visit",
+        VisitObj: visit,
+        Class: (visit.Brand === "Rex") ? "rex" : "cp"  // cp optional
+      };
+  }
+
+  return null;
+}
+
+
+/* ------------------ Render Calendar ------------------ */
+function renderCalendar(year, month){
+
+  calYear = year;
+  calMonth = month;
+
+  document.getElementById("calendarTitle").innerText =
+    `${monthName(month)} ${year}`;
+
+  const grid = document.getElementById("calendarGrid");
+  grid.innerHTML = "";
+
+  // Week headers
+  const weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  weekday.forEach(w=>{
+    const h = document.createElement("div");
+    h.style.fontWeight="700";
+    h.style.textAlign="center";
+    h.style.padding="6px 0";
+    grid.appendChild(h);
+    h.innerText = w;
+  });
+
+  const first = new Date(year, month, 1);
+  const startIndex = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  // leading blanks
+  for(let i=0;i<startIndex;i++){
+    const d = document.createElement("div");
+    d.className = "calendarDay disabled";
+    grid.appendChild(d);
+  }
+
+  // real days
+  for(let day=1; day<=daysInMonth; day++){
+    const dateObj = new Date(year, month, day);
+    const key = ymd(dateObj);
+
+    const cell = document.createElement("div");
+    cell.className = "calendarDay";
+
+    if(key === ymd(new Date())) cell.classList.add("today");
+
+    // day number
+    const dn = document.createElement("div");
+    dn.className="dayNum";
+    dn.innerText=day;
+    cell.appendChild(dn);
+
+    if(presenceData[key]){
+      const s = presenceData[key].Status;
+      const label = document.createElement("div");
+      label.className="statusLabel";
+      label.innerText = s;
+
+      // Color assignment
+      const lower = s.toLowerCase();
+      if(lower.includes("rex")) label.style.background= "var(--rex)";
+      else if(lower.includes("cp")) label.style.background="var(--cp)";
+      else if(lower.includes("office")) label.style.background="var(--office)";
+      else if(lower.includes("leave")) label.style.background="var(--leave)";
+      else if(lower.includes("holiday")) label.style.background="var(--holiday)";
+      else label.style.background="#94a3b8";
+
+      label.style.color = "#fff";
+      cell.appendChild(label);
+    }
+
+else {
+    // no presence, check visits
+    const vday = getVisitStatusForDate(key);
+
+    if(vday){
+        const label = document.createElement("div");
+        label.className = "statusLabel";
+
+        if(vday.Status === "Rex-Visit"){
+            label.style.background = "var(--rex)";
+            label.style.color = "#fff";
+            label.innerText = "Rex-Visit";
+        }
+        else {
+            label.style.background = "var(--cp)";
+            label.style.color = "#000";
+            label.innerText = "Visit";
+        }
+
+        cell.appendChild(label);
+    }
+}
+
+    // Interactions
+    cell.addEventListener("dblclick", () => {
+      if (presenceData[key]) {
+        openEditModal(key);
+      } else {
+        openAddModal(key);
+      }
+    });
+
+    grid.appendChild(cell);
+  } // ✅ END of for(day...)
+
+  // ✅ trailing blanks to finish row (MUST be OUTSIDE the loop)
+  const total = startIndex + daysInMonth;
+  const trailing = (7 - (total % 7)) % 7;
+  for(let i=0;i<trailing;i++){
+    const d = document.createElement("div");
+    d.className = "calendarDay disabled";
+    grid.appendChild(d);
+  }
+}
+
+
+/* ------------------ Calendar Navigation ------------------ */
+function prevMonth(){
+  if(calMonth === 0){ calMonth = 11; calYear--; }
+  else calMonth--;
+  renderCalendar(calYear, calMonth);
+}
+
+function nextMonth(){
+  if(calMonth === 11){ calMonth = 0; calYear++; }
+  else calMonth++;
+  renderCalendar(calYear, calMonth);
+}
+
+function goToThisMonth(){
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar(calYear, calMonth);
+}
+
+
+/* ------------------ Modal Controls ------------------ */
+
+function openAddModal(key){
+  document.getElementById("presenceModal").style.display = "flex";
+  document.getElementById("presenceModalTitle").innerText = "Add Presence";
+
+  document.getElementById("modalEngineerName").value = state.engineerName;
+  document.getElementById("modalFromDate").value = key;
+  document.getElementById("modalToDate").value = key;
+  document.getElementById("modalPresenceType").value = "";
+  document.getElementById("modalNote").value = "";
+
+  const saveBtn = document.getElementById("modalSaveBtn");
+  saveBtn.dataset.mode = "add";
+  saveBtn.dataset.presenceId = "";
+
+  document.getElementById("modalDeleteBtn").style.display = "none";
+}
+
+function openEditModal(key){
+  const data = presenceData[key];
+
+  document.getElementById("presenceModal").style.display = "flex";
+  document.getElementById("presenceModalTitle").innerText = "Edit Presence";
+
+  document.getElementById("modalEngineerName").value = state.engineerName;
+  document.getElementById("modalFromDate").value = key;
+  document.getElementById("modalToDate").value = key;
+
+  document.getElementById("modalPresenceType").value = data.Status;
+  document.getElementById("modalNote").value = data.Notes || "";
+
+  const saveBtn = document.getElementById("modalSaveBtn");
+  saveBtn.dataset.mode = "edit";
+  saveBtn.dataset.presenceId = data.PresenceId;
+
+  document.getElementById("modalDeleteBtn").style.display = "inline-block";
+}
+
+
+function closePresenceModal(){
+  document.getElementById("presenceModal").style.display="none";
+}
+
+/* ------------------ Save / Update Presence ------------------ */
+async function savePresenceFromModal(){
+
+  const saveBtn = document.getElementById("modalSaveBtn");
+  const mode = saveBtn.dataset.mode;
+
+  // ✅ FIX: define presenceId properly
+  const presenceId = saveBtn.dataset.presenceId || "";
+
+  // 🔹 Read modal fields
+  const engineerName = document.getElementById("modalEngineerName").value;
+  const fromDate = document.getElementById("modalFromDate").value;
+  const toDate = document.getElementById("modalToDate").value;
+  const presenceType = document.getElementById("modalPresenceType").value;
+  const note = document.getElementById("modalNote").value || "";
+
+  // 🔹 Basic validations
+  if(!presenceType){
+    toast("Select Presence Type");
+    return;
+  }
+
+  if(!fromDate || !toDate){
+    toast("Select From and To date");
+    return;
+  }
+
+  // 🔹 Payload EXACTLY as Flow expects
+  const payload = {
+    action: mode === "edit" ? "updatePresence" : "savePresence",
+    presenceId: presenceId,     // ✅ now valid
+    engineerName: engineerName,
+    fromDate: fromDate,
+    toDate: toDate,
+    presenceType: presenceType,
+    note: note
+  };
+
+  try{
+    const r = await postFlow(payload);
+
+    if(r && r.success){
+      renderCalendar(calYear, calMonth);
+      closePresenceModal();
+      toast("Presence saved");
+    } else {
+      toast("Save failed");
+    }
+
+  } catch(e){
+    console.error(e);
+    toast("Save error");
+  }
+}
+
+
+/* ------------------ Delete Presence ------------------ */
+async function deletePresenceFromModal(){
+  const date = document.getElementById("modalFromDate").value;
+
+  if(!confirm("Delete presence for " + date + "?")) return;
+
+  const payload = {
+    action:"deletePresence",
+    presence:{ Date:date, Username:state.username }
+  };
+
+  try{
+    const r = await postFlow(payload);
+
+    if(r && r.success){
+      delete presenceData[date];
+      renderCalendar(calYear, calMonth);
+      closePresenceModal();
+      toast("Deleted");
+    } else {
+      toast("Delete failed");
+    }
+
+  } catch(e){
+    console.error(e);
+    toast("Delete error");
+  }
+}
+
+
+/* =====================================================================
+   AUTO-LOAD ON STARTUP
+   ===================================================================== */
+window.addEventListener("load", ()=>{
+
+  // Restore endpoint
+  state.endpoint = localStorage.getItem("mitra_flow") || DEFAULT_ENDPOINT;
+
+  // 🔒 FORCE LOGGED-OUT UI FIRST
+  document.getElementById("loginCard").classList.remove("hidden");
+  document.getElementById("visits").classList.add("hidden");
+  document.getElementById("presence").classList.add("hidden");
+  document.getElementById("bottomNavWrap").classList.add("hidden");
+  document.getElementById("loggedUserInline").innerText = "";
+  document.getElementById("btnHeaderLogin").innerText = "🔓";
+
+  // ✅ Auto-login ONLY if session exists
   if(state.username && state.engineerName){
-      document.getElementById("loginCard").classList.add("hidden");
-      document.getElementById("visits").classList.remove("hidden");
-      document.getElementById("bottomNavWrap").classList.remove("hidden");
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("visits").classList.remove("hidden");
+    document.getElementById("bottomNavWrap").classList.remove("hidden");
 
-      document.getElementById("loggedUserInline").innerText = state.engineerName;
-      document.getElementById("btnHeaderLogin").innerText = "🔓";
+    document.getElementById("loggedUserInline").innerText = state.engineerName;
+    document.getElementById("btnHeaderLogin").innerText = "🔒";
 
-      switchTab("visits");
-  } else {
-      document.getElementById("loginCard").classList.remove("hidden");
-      document.getElementById("visits").classList.add("hidden");
-      document.getElementById("presence").classList.add("hidden");
-      document.getElementById("bottomNavWrap").classList.add("hidden");
-      document.getElementById("loggedUserInline").innerText = "";
+    switchTab("visits");
   }
 });
 
 </script>
+
+<!-- ========================= BOTTOM NAVIGATION ========================= -->
+<div id="bottomNavWrap" class="bottomNav hidden">
+  <div id="navVisits" class="navBtn active" onclick="switchTab('visits')">Visits</div>
+  <div id="navPresence" class="navBtn" onclick="switchTab('presence')">Presence</div>
+</div>
+
+
+</div> <!-- END .app -->
+
 </body>
 </html>
