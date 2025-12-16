@@ -1305,32 +1305,37 @@ async function savePresenceFromModal(){
 
 /* ------------------ Delete Presence ------------------ */
 async function deletePresenceFromModal(){
-  const date = document.getElementById("modalFromDate").value;
+  const saveBtn = document.getElementById("modalSaveBtn");
+  const presenceId = saveBtn.dataset.presenceId;
 
-  if(!confirm("Delete presence for " + date + "?")) return;
+  if(!presenceId){
+    toast("Invalid Presence Id");
+    return;
+  }
+
+  if(!confirm("Delete this presence entry?")) return;
 
   const payload = {
-    action:"deletePresence",
-    presence:{ Date:date, Username:state.username }
+    action: "deletePresence",
+    presenceId: presenceId
   };
 
   try{
     const r = await postFlow(payload);
 
     if(r && r.success){
-      delete presenceData[date];
       renderCalendar(calYear, calMonth);
       closePresenceModal();
       toast("Deleted");
     } else {
       toast("Delete failed");
     }
-
   } catch(e){
     console.error(e);
     toast("Delete error");
   }
 }
+
 
 
 /* =====================================================================
