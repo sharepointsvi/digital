@@ -493,6 +493,99 @@ body{
 </div>
 
 
+<!-- ========================= PRESENCE PAGE ========================= -->
+<div id="presence" class="hidden">
+
+  <div class="calendarCard">
+
+    <!-- CALENDAR HEADER -->
+	<div class="calendarHeaderRow">
+	  <div class="calendarMonthTitle" id="calendarTitle">December 2025</div>
+	</div>
+
+	<div class="presenceNav">
+	  <button class="presenceNavBtn" onclick="prevMonth()">◀ Prev</button>
+	  <button class="presenceNavBtn todayBtn" onclick="goToCurrentMonth()" title="Go to current month">
+  📅
+</button>
+	  <button class="presenceNavBtn" onclick="nextMonth()">Next ▶</button>
+	</div>
+
+    <!-- CALENDAR GRID -->
+    <div id="calendarGrid"></div>
+
+    <!-- LEGEND -->
+    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:13px;">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--rex);border-radius:4px;"></span> Rex-Visit
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--cp);border-radius:4px;"></span> Cp-Visit
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--office);border-radius:4px;"></span> Office
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--leave);border-radius:4px;"></span> Leave
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="width:14px;height:14px;background:var(--holiday);border-radius:4px;"></span> Holiday
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ========================= PRESENCE MODAL ========================= -->
+<div id="presenceModal" class="modalOverlay">
+  <div class="modalCard">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div id="presenceModalTitle" style="font-weight:700;font-size:18px;">Presence</div>
+      <div onclick="closePresenceModal()" style="font-size:20px;cursor:pointer">✕</div>
+    </div>
+
+    <div style="margin-top:10px">
+
+	<div class="label">Engineer Name</div>
+	<input id="modalEngineerName" class="input" readonly>
+
+	<div class="label">From Date</div>
+	<input id="modalFromDate" type="date" class="input">
+
+	<div class="label">To Date</div>
+	<input id="modalToDate" type="date" class="input">
+
+	<div class="label">Presence Type</div>
+	<select id="modalPresenceType" class="input">
+	  <option value="">Select</option>
+	  <option value="Rex-Visit">Rex-Visit</option>
+	  <option value="Cp-Visit">Cp-Visit</option>
+	  <option value="Office">Office</option>
+	  <option value="Leave">Leave</option>
+	  <option value="Holiday">Holiday</option>
+	</select>
+
+	<div class="label">Note</div>
+	<textarea id="modalNote" class="input" rows="3" placeholder="Optional"></textarea>
+
+
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
+        <button id="modalSaveBtn" class="btn" onclick="savePresenceFromModal()">Save</button>
+        <button id="modalDeleteBtn" class="btn" style="background:#e85d5d;display:none;"
+            onclick="deletePresenceFromModal()">Delete</button>
+        <button class="small" onclick="closePresenceModal()">Cancel</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+
 <script>
 /* =====================================================================
    GLOBAL STATE + DEFAULT ENDPOINT + LOGIN CONTROL
@@ -538,11 +631,13 @@ function formatDateOnly(s){
   return d.toISOString().slice(0,10);
 }
 
-function excelSerialToDate(serial) {
-  const excelEpoch = new Date(1899, 11, 30);
-  return new Date(excelEpoch.getTime() + Number(serial) * 86400000);
+function excelSerialToDate(serial){
+  // Excel epoch starts at 1899-12-30
+  const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+  const d = new Date(excelEpoch.getTime() + serial * 86400000);
+  d.setHours(12, 0, 0, 0); // prevent timezone shift
+  return d;
 }
-
 
 /* =====================================================================
    SETTINGS SHEET LOGIC
@@ -841,7 +936,55 @@ function openVisitModal(v){
 function closeVisitModal(){
   document.getElementById("visitModal").style.display = "none";
 }
+/* ------------------ Load presence from Flow ------------------ */
+async function loadPresence(){
+  if(!state.username) return;
 
+  try{
+    const r = await postFlow({
+      action: "getPresence",
+      engineerName: state.engineerName
+    });
+
+    console.log("Presence raw response:", r);
+
+    const arr = r?.present || [];
+
+    presenceData = {}; // ✅ reset ONLY after data arrives
+
+    arr.forEach(row => {
+      if(!row.FromDate || !row.ToDate) return;
+
+      const from = excelSerialToDate(Number(row.FromDate));
+      const to   = excelSerialToDate(Number(row.ToDate));
+
+      let d = new Date(from);
+
+      while(d <= to){
+        const key = ymd(d);
+
+        presenceData[key] = {
+          PresenceId: row.PresenceId,
+          Status: row.PresenceType,
+          Notes: row.Note || "",
+          FromDate: row.FromDate,
+          ToDate: row.ToDate
+        };
+
+        d.setDate(d.getDate() + 1);
+      }
+    });
+
+    console.log("FINAL presenceData:", presenceData);
+    console.log("Presence keys:", Object.keys(presenceData));
+
+    renderCalendar(calYear, calMonth);
+
+  } catch(e){
+    console.error(e);
+    toast("Failed loading presence");
+  }
+}
 
 /* =====================================================================
    TAB SWITCHING
@@ -884,102 +1027,6 @@ function headerRefresh(){
   toast("Refreshed");
 }
 
-/* ========================= END OF PART 2 ========================= */
-</script>
-
-<!-- ========================= PRESENCE PAGE ========================= -->
-<div id="presence" class="hidden">
-
-  <div class="calendarCard">
-
-    <!-- CALENDAR HEADER -->
-	<div class="calendarHeaderRow">
-	  <div class="calendarMonthTitle" id="calendarTitle">December 2025</div>
-	</div>
-
-	<div class="presenceNav">
-	  <button class="presenceNavBtn" onclick="prevMonth()">◀ Prev</button>
-	  <button class="presenceNavBtn todayBtn" onclick="goToCurrentMonth()" title="Go to current month">
-  📅
-</button>
-	  <button class="presenceNavBtn" onclick="nextMonth()">Next ▶</button>
-	</div>
-
-    <!-- CALENDAR GRID -->
-    <div id="calendarGrid"></div>
-
-    <!-- LEGEND -->
-    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:13px;">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="width:14px;height:14px;background:var(--rex);border-radius:4px;"></span> Rex-Visit
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="width:14px;height:14px;background:var(--cp);border-radius:4px;"></span> Cp-Visit
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="width:14px;height:14px;background:var(--office);border-radius:4px;"></span> Office
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="width:14px;height:14px;background:var(--leave);border-radius:4px;"></span> Leave
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="width:14px;height:14px;background:var(--holiday);border-radius:4px;"></span> Holiday
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-<!-- ========================= PRESENCE MODAL ========================= -->
-<div id="presenceModal" class="modalOverlay">
-  <div class="modalCard">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div id="presenceModalTitle" style="font-weight:700;font-size:18px;">Presence</div>
-      <div onclick="closePresenceModal()" style="font-size:20px;cursor:pointer">✕</div>
-    </div>
-
-    <div style="margin-top:10px">
-
-	<div class="label">Engineer Name</div>
-	<input id="modalEngineerName" class="input" readonly>
-
-	<div class="label">From Date</div>
-	<input id="modalFromDate" type="date" class="input">
-
-	<div class="label">To Date</div>
-	<input id="modalToDate" type="date" class="input">
-
-	<div class="label">Presence Type</div>
-	<select id="modalPresenceType" class="input">
-	  <option value="">Select</option>
-	  <option value="Rex-Visit">Rex-Visit</option>
-	  <option value="Cp-Visit">Cp-Visit</option>
-	  <option value="Office">Office</option>
-	  <option value="Leave">Leave</option>
-	  <option value="Holiday">Holiday</option>
-	</select>
-
-	<div class="label">Note</div>
-	<textarea id="modalNote" class="input" rows="3" placeholder="Optional"></textarea>
-
-
-
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
-        <button id="modalSaveBtn" class="btn" onclick="savePresenceFromModal()">Save</button>
-        <button id="modalDeleteBtn" class="btn" style="background:#e85d5d;display:none;"
-            onclick="deletePresenceFromModal()">Delete</button>
-        <button class="small" onclick="closePresenceModal()">Cancel</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-
-<script>
 /* =====================================================================
    PRESENCE MODULE
    ===================================================================== */
@@ -994,42 +1041,6 @@ function ymd(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDat
 function monthName(m){
   return new Date(calYear, m, 1)
     .toLocaleString("default", {month:"long"});
-}
-
-/* ------------------ Load presence from Flow ------------------ */
-async function loadPresence(){
-  if(!state.username) return;
-
-	renderCalendar(calYear, calMonth);
-
-  try{
-	const r = await postFlow({
-	  action: "getPresence",
-	  engineerName: state.engineerName
-	});
-
-    const arr = r?.present?.body || r?.present || [];
-
-presenceData = {};
-
-arr.forEach(row => {
-  if (!row.FromDate) return;
-
-  const d = excelSerialToDate(row.FromDate);
-  const key = ymd(d);
-
-  presenceData[key] = {
-    Status: row.PresenceType,
-    Notes: row.Note || ""
-  };
-});
-
-    renderCalendar(calYear, calMonth);
-
-  } catch(e){
-    console.error(e);
-    toast("Failed loading presence");
-  }
 }
 
 function getVisitStatusForDate(dateKey){
@@ -1285,21 +1296,21 @@ async function savePresenceFromModal(){
     note: note
   };
 
-  try{
-    const r = await postFlow(payload);
+try {
+  const r = await postFlow(payload);
 
-    if(r && r.success){
-      renderCalendar(calYear, calMonth);
-      closePresenceModal();
-      toast("Presence saved");
-    } else {
-      toast("Save failed");
-    }
-
-  } catch(e){
-    console.error(e);
-    toast("Save error");
+  if (r && r.success) {
+    await loadPresence();          // 🔥 always re-fetch from Excel
+    closePresenceModal();
+    toast("Presence saved");
+  } else {
+    toast("Save failed");          // ✅ restored
   }
+
+} catch (e) {
+  console.error(e);
+  toast("Save error");
+}
 }
 
 
@@ -1323,20 +1334,19 @@ async function deletePresenceFromModal(){
   try{
     const r = await postFlow(payload);
 
-    if(r && r.success){
-      renderCalendar(calYear, calMonth);
+    if (r && r.success) {
+      await loadPresence();        // 🔥 refresh from Excel
       closePresenceModal();
       toast("Deleted");
     } else {
       toast("Delete failed");
     }
+
   } catch(e){
     console.error(e);
     toast("Delete error");
   }
 }
-
-
 
 /* =====================================================================
    AUTO-LOAD ON STARTUP
