@@ -297,6 +297,10 @@ body{
   gap:6px;
 }
 
+#calendarGrid{
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
 .calendarDay{
   min-height:70px;
   background:#fff;
@@ -306,6 +310,10 @@ body{
   display:flex;
   flex-direction:column;
   cursor:pointer;
+}
+
+.calendarDay{
+  min-width: 0;
 }
 
 .calendarDay.disabled{
@@ -394,6 +402,63 @@ body{
   color:#0b2540;
 }
 
+/* Home tab inclusion */
+/* ===== HOME (Glossy) ===== */
+.noticeBox{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  padding:10px;
+  border-radius:12px;
+  color:#9a3412;
+  font-weight:600;
+  overflow:hidden;
+}
+.noticeScroll{
+  white-space:nowrap;
+  animation:marquee 18s linear infinite;
+}
+@keyframes marquee{
+  from{transform:translateX(100%)}
+  to{transform:translateX(-100%)}
+}
+
+.syncInfo{
+  font-size:11px;
+  opacity:0.85;
+  margin-left:8px;
+}
+
+.monthBar{
+  width:100%;
+  border-radius:6px;
+  background:#cbd5e1;
+  position:relative;
+}
+
+.monthBar.active{
+  background:#0f6cbd;
+}
+
+.monthBar.future{
+  background:repeating-linear-gradient(
+    45deg,
+    #e5e7eb,
+    #e5e7eb 6px,
+    #f9fafb 6px,
+    #f9fafb 12px
+  );
+}
+
+.monthVal{
+  position:absolute;
+  top:-18px;
+  width:100%;
+  text-align:center;
+  font-size:11px;
+  font-weight:600;
+  color:#0b2540;
+}
+
 
 /* ------------------------- END OF PART 1 CSS ------------------------- */
 </style>
@@ -434,6 +499,56 @@ body{
   </div>
 </div>
 
+<!-- ========================= HOME PAGE ========================= -->
+<div id="home" class="card hidden">
+
+  <div style="font-weight:700;font-size:18px;margin-bottom:8px;">
+    Welcome, <span id="homeEngineer">—</span>
+  </div>
+
+  <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">
+    <span id="homeDate">—</span>
+  </div>
+
+  <div class="noticeBox">
+    <div class="noticeScroll" id="homeNotice">
+      Loading system notice...
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:14px;">
+    <div style="flex:1;background:#eef2f6;padding:12px;border-radius:12px;text-align:center;">
+      <div style="font-size:12px;color:#6b7280;">This Month Mandays</div>
+      <div id="homeMandays" style="font-size:22px;font-weight:700;">0</div>
+    </div>
+  </div>
+
+<div style="margin-top:14px;padding:12px;background:#eef2f6;border-radius:12px;">
+  <div style="font-size:12px;color:#6b7280;">Today's Status</div>
+  <div id="homeTodayStatus" style="font-size:15px;font-weight:700;">
+    Checking...
+  </div>
+</div>
+
+<!-- ================= MONTHLY MANDAYS BAR ================= -->
+<div style="margin-top:16px;">
+  <div style="font-size:13px;color:#6b7280;margin-bottom:6px;">
+    Mandays – {{Current Year}}
+  </div>
+
+  <div id="homeMonthBar"
+       style="display:grid;grid-template-columns:repeat(12,1fr);
+              gap:6px;align-items:end;height:120px;">
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(12,1fr);
+              gap:6px;margin-top:6px;font-size:11px;text-align:center;color:#6b7280;">
+    <div>J</div><div>F</div><div>M</div><div>A</div><div>M</div><div>J</div>
+    <div>J</div><div>A</div><div>S</div><div>O</div><div>N</div><div>D</div>
+  </div>
+</div>
+
+</div>
 
 <!-- ========================= SETTINGS SHEET ========================= -->
 <div id="settingsSheet" class="sheetWrap">
@@ -536,7 +651,6 @@ body{
   </div>
 </div>
 
-
 <!-- ========================= PRESENCE MODAL ========================= -->
 <div id="presenceModal" class="modalOverlay">
   <div class="modalCard">
@@ -570,8 +684,6 @@ body{
 	<div class="label">Note</div>
 	<textarea id="modalNote" class="input" rows="3" placeholder="Optional"></textarea>
 
-
-
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px;">
         <button id="modalSaveBtn" class="btn" onclick="savePresenceFromModal()">Save</button>
         <button id="modalDeleteBtn" class="btn" style="background:#e85d5d;display:none;"
@@ -582,9 +694,6 @@ body{
 
   </div>
 </div>
-
-
-
 
 <script>
 /* =====================================================================
@@ -604,7 +713,6 @@ const state = {
   engineerName: localStorage.getItem("mitra_engineer") || "",
   zone: localStorage.getItem("mitra_zone") || ""
 };
-
 
 /* =====================================================================
    UTILITY HELPERS
@@ -626,10 +734,16 @@ function escapeHtml(s){
 
 function formatDateOnly(s){
   if(!s) return "";
-  const d = new Date(s);
-  if(String(d) === "Invalid Date") return s;
-  return d.toISOString().slice(0,10);
+
+  // If Flow / Excel ISO string → take date part only
+  if(typeof s === "string" && s.includes("T")){
+    return s.split("T")[0]; // YYYY-MM-DD (NO timezone conversion)
+  }
+
+  // If already date-only string
+  return s;
 }
+
 
 function excelSerialToDate(serial){
   // Excel epoch starts at 1899-12-30
@@ -638,6 +752,19 @@ function excelSerialToDate(serial){
   d.setHours(12, 0, 0, 0); // prevent timezone shift
   return d;
 }
+
+function excelDateToDisplay(value){
+  if(!value) return "";
+
+  // If ISO string from Flow
+  if(typeof value === "string" && value.includes("T")){
+    return value.split("T")[0]; // YYYY-MM-DD
+  }
+
+  // If already date-like string
+  return value;
+}
+
 
 /* =====================================================================
    SETTINGS SHEET LOGIC
@@ -700,7 +827,11 @@ async function login(){
 	document.getElementById("presence").classList.add("hidden");
     document.getElementById("bottomNavWrap").classList.remove("hidden");
 
-    switchTab("visits");
+	// Reset before loading new user data
+	globalVisits = [];
+	presenceData = {};
+
+	switchTab("home");
     toast("Login successful");
 
   } catch(e){
@@ -711,6 +842,10 @@ async function login(){
 
 function logout(){
 
+   // 🔥 FIX: clear previous user data
+  globalVisits = [];
+  presenceData = {};
+
   localStorage.removeItem("mitra_user");
   localStorage.removeItem("mitra_engineer");
 
@@ -720,6 +855,7 @@ function logout(){
   document.getElementById("loggedUserInline").innerText = "";
   document.getElementById("btnHeaderLogin").innerText = "🔓";
 
+  document.getElementById("home").classList.add("hidden");   // ✅ FIX
   document.getElementById("visits").classList.add("hidden");
   document.getElementById("presence").classList.add("hidden");
   document.getElementById("bottomNavWrap").classList.add("hidden");
@@ -946,11 +1082,10 @@ async function loadPresence(){
       engineerName: state.engineerName
     });
 
-    console.log("Presence raw response:", r);
-
     const arr = r?.present || [];
 
-    presenceData = {}; // ✅ reset ONLY after data arrives
+    // 🔥🔥🔥 HARD RESET — THIS WAS MISSING
+    presenceData = {};
 
     arr.forEach(row => {
       if(!row.FromDate || !row.ToDate) return;
@@ -966,17 +1101,14 @@ async function loadPresence(){
         presenceData[key] = {
           PresenceId: row.PresenceId,
           Status: row.PresenceType,
-          Notes: row.Note || "",
-          FromDate: row.FromDate,
-          ToDate: row.ToDate
+          Notes: row.Note || ""
         };
 
         d.setDate(d.getDate() + 1);
       }
     });
 
-    console.log("FINAL presenceData:", presenceData);
-    console.log("Presence keys:", Object.keys(presenceData));
+    console.log("Presence keys after Excel load:", Object.keys(presenceData));
 
     renderCalendar(calYear, calMonth);
 
@@ -986,6 +1118,7 @@ async function loadPresence(){
   }
 }
 
+
 /* =====================================================================
    TAB SWITCHING
    ===================================================================== */
@@ -993,9 +1126,21 @@ async function loadPresence(){
 async function switchTab(tab){
   document.getElementById("visits").classList.add("hidden");
   document.getElementById("presence").classList.add("hidden");
+  document.getElementById("home").classList.add("hidden");
 
   document.getElementById("navVisits").classList.remove("active");
   document.getElementById("navPresence").classList.remove("active");
+
+if(tab === "home"){
+  document.getElementById("home").classList.remove("hidden");
+
+  // 🔥 ensure fresh data
+  loadVisits().then(()=>{
+    loadHome();
+  });
+
+  loadSystemNotice();
+}
 
   if(tab === "visits"){
     document.getElementById("navVisits").classList.add("active");
@@ -1008,6 +1153,7 @@ async function switchTab(tab){
     await loadVisits();
 	loadPresence();
   }
+
 }
 
 /* =====================================================================
@@ -1348,6 +1494,240 @@ async function deletePresenceFromModal(){
   }
 }
 
+/* ================= HOME HELPERS ================= */
+
+function loadHome(){
+
+  const today = new Date();
+  const todayKey = today.getFullYear() + "-" +
+  String(today.getMonth()+1).padStart(2,"0") + "-" +
+  String(today.getDate()).padStart(2,"0");
+
+
+  document.getElementById("homeDate").innerText = today.toDateString();
+  document.getElementById("homeEngineer").innerText = state.engineerName || "";
+
+  /* ===============================
+     1️⃣ COMPLETED MANDAYS – CURRENT MONTH
+     =============================== */
+/* ===============================
+   1️⃣ COMPLETED + ACTIVE MANDAYS – CURRENT MONTH
+   =============================== */
+
+let totalMandays = 0;
+const m = today.getMonth();
+const y = today.getFullYear();
+
+// month boundaries
+const monthStart = new Date(y, m, 1);
+const monthEnd   = new Date(y, m + 1, 0, 23, 59, 59, 999);
+
+if (Array.isArray(globalVisits)) {
+  globalVisits.forEach(v => {
+
+    const start = new Date(v.StartDate || v.Start || "");
+    const end   = new Date(v.EndDate || v.End || "");
+
+    if (isNaN(start) || isNaN(end)) return;
+
+    const visitStatus = classifyVisit(v);
+
+    /* =========================
+       COMPLETED VISITS
+       ========================= */
+    if (visitStatus === "completed") {
+
+      const from = new Date(Math.max(start, monthStart));
+      const to   = new Date(Math.min(end, monthEnd));
+
+      if (from <= to) {
+        const days =
+          Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+        totalMandays += days;
+      }
+    }
+
+    /* =========================
+       ACTIVE VISITS (till today)
+       ========================= */
+    if (
+      visitStatus === "active" &&
+      start <= today &&
+      end >= today
+    ) {
+
+      const from = new Date(Math.max(start, monthStart));
+      const to   = new Date(Math.min(today, end));
+
+      if (from <= to) {
+        const days =
+          Math.floor((to - from) / (1000 * 60 * 60 * 24)) + 1;
+        totalMandays += days;
+      }
+    }
+
+  });
+}
+
+document.getElementById("homeMandays").innerText =
+  totalMandays.toFixed(1);
+
+
+  /* ===============================
+     2️⃣ TODAY STATUS (INTELLIGENT)
+     =============================== */
+
+  let todayText = "No plan for today";
+
+  // A) Presence has top priority
+  if(window.presenceData && presenceData[todayKey]){
+    todayText = `Today you are on ${presenceData[todayKey].Status}`;
+  }
+
+  // B) Active visit
+  else if(Array.isArray(globalVisits)){
+    const activeVisit = globalVisits.find(v=>{
+	const s = formatDateOnly(v.StartDate || v.Start || "");
+	const e = formatDateOnly(v.EndDate || v.End || "");
+	return s <= todayKey && todayKey <= e;
+    });
+
+    if(activeVisit){
+      todayText =
+        `Today you are at ${activeVisit.CustomerName || "Customer"}`
+        + (activeVisit.SiteLocation
+           ? ` – ${activeVisit.SiteLocation}` : "");
+    }
+    else{
+      // C) Upcoming visit
+		const upcoming = globalVisits
+		  .filter(v=>{
+			const s = formatDateOnly(v.StartDate || v.Start || "");
+			return s > todayKey;
+		  })
+        .sort((a,b)=>
+          new Date(a.StartDate || a.Start) -
+          new Date(b.StartDate || b.Start)
+        )[0];
+
+      if(upcoming){
+        todayText =
+          `Upcoming visit to ${upcoming.CustomerName || "Customer"}`
+          + (upcoming.SiteLocation
+             ? ` – ${upcoming.SiteLocation}` : "");
+      }
+    }
+  }
+	renderMonthlyMandaysBar();
+  document.getElementById("homeTodayStatus").innerText = todayText;
+}
+
+function renderMonthlyMandaysBar(){
+
+  const container = document.getElementById("homeMonthBar");
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const year = new Date().getFullYear();
+  const today = new Date();
+  const currentMonth = today.getMonth();
+
+  // init 12 months
+  const monthTotals = Array(12).fill(0);
+
+  if(Array.isArray(globalVisits)){
+    globalVisits.forEach(v=>{
+
+      const status = classifyVisit(v);
+      const start = new Date(v.StartDate || v.Start || "");
+      const end   = new Date(v.EndDate || v.End || "");
+
+      if(isNaN(start) || isNaN(end)) return;
+
+      for(let m=0; m<12; m++){
+
+        const monthStart = new Date(year, m, 1);
+        const monthEnd   = new Date(year, m+1, 0, 23,59,59,999);
+
+        let from, to;
+
+        // COMPLETED visits → full overlap
+        if(status === "completed"){
+          from = new Date(Math.max(start, monthStart));
+          to   = new Date(Math.min(end, monthEnd));
+        }
+
+        // CURRENT MONTH ACTIVE → till today only
+        else if(
+          status === "active" &&
+          m === currentMonth &&
+          start <= today &&
+          end >= today
+        ){
+          from = new Date(Math.max(start, monthStart));
+          to   = new Date(Math.min(today, end));
+        }
+        else{
+          continue;
+        }
+
+        if(from <= to){
+          const days =
+            Math.floor((to - from) / (1000*60*60*24)) + 1;
+          monthTotals[m] += days;
+        }
+      }
+    });
+  }
+
+  const max = Math.max(...monthTotals, 1);
+
+  monthTotals.forEach((val, m)=>{
+
+    const bar = document.createElement("div");
+    bar.className = "monthBar";
+
+    if(m > currentMonth){
+      bar.classList.add("future");
+      bar.style.height = "20%";
+    }
+    else{
+      bar.style.height = (val / max * 100) + "%";
+      bar.classList.add("active");
+    }
+
+    if(val > 0){
+      const label = document.createElement("div");
+      label.className = "monthVal";
+      label.innerText = val;
+      bar.appendChild(label);
+    }
+
+    container.appendChild(bar);
+  });
+}
+
+
+async function loadSystemNotice(){
+  try{
+    const r = await postFlow({ action:"getSystemNotice" });
+    document.getElementById("homeNotice").innerText =
+      r?.message || "All systems running normally";
+  }catch(e){
+    document.getElementById("homeNotice").innerText =
+      "All systems running normally";
+  }
+}
+
+function updateSyncTime(){
+  const el = document.getElementById("syncInfo");
+  if(el){
+    el.innerText = "Last sync: " + new Date().toLocaleTimeString();
+    el.classList.remove("hidden");
+  }
+}
+
 /* =====================================================================
    AUTO-LOAD ON STARTUP
    ===================================================================== */
@@ -1381,10 +1761,10 @@ window.addEventListener("load", ()=>{
 
 <!-- ========================= BOTTOM NAVIGATION ========================= -->
 <div id="bottomNavWrap" class="bottomNav hidden">
+  <div class="navBtn" onclick="switchTab('home')">Home</div>
   <div id="navVisits" class="navBtn active" onclick="switchTab('visits')">Visits</div>
   <div id="navPresence" class="navBtn" onclick="switchTab('presence')">Presence</div>
 </div>
-
 
 </div> <!-- END .app -->
 
